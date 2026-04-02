@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend_data:/app/data
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=sqlite:///./data/questionnaire.db
+      - CHROMA_PERSIST_DIR=./data/chroma
+      - ARTEFACT_STORAGE_DIR=./data/artefacts
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+    command: npm run dev
+
+volumes:
+  backend_data:
